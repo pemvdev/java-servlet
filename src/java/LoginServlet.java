@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -9,8 +12,25 @@ public class LoginServlet extends HttpServlet {
 
         String usuario = request.getParameter("usuario");
         String senha = request.getParameter("senha");
+        
+        boolean isValido = false;
 
-        if ("admin".equals(usuario) && "123".equals(senha)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT id FROM usuarios WHERE usuario = ? AND senha = ?")) {
+             
+            stmt.setString(1, usuario);
+            stmt.setString(2, senha);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    isValido = true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (isValido) {
 
             // cria sessão
             HttpSession session = request.getSession();
@@ -21,7 +41,7 @@ public class LoginServlet extends HttpServlet {
 
         } else {
             // volta pro login
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.jsp?error=invalid");
         }
     }
 }
