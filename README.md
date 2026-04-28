@@ -1,102 +1,204 @@
-# java-servlet
+# 📦 Projeto Java Servlet + Tomcat
 
-🔐 Sistema de Login com Sessão (Servlet + JSP)
+Este projeto é uma aplicação web simples utilizando **Java Servlets + JSP + PostgreSQL**, executada manualmente no **Apache Tomcat**.
 
-Este projeto é um exemplo simples de autenticação utilizando Java Servlet + JSP, seguindo um estilo legado (sem frameworks modernos).
+---
 
-📌 Objetivo
+# 🚀 Como rodar o projeto
 
-Demonstrar como funciona:
+## 1. Build do projeto
 
-HttpSession
-Controle de acesso
-Redirecionamento entre páginas
-Autenticação básica
-🧱 Tecnologias utilizadas
-Java
-Servlet API
-JSP (JavaServer Pages)
-Apache Tomcat
-HTML
-📁 Estrutura do projeto
-/src
-  ├── LoginServlet.java
-  ├── LogoutServlet.java
+Sempre que alterar código Java (Servlets, classes, etc), gere o `.war`:
 
-/web
-  ├── login.jsp
-  ├── dashboard.jsp
-  ├── erro.jsp
-  └── WEB-INF
-        └── web.xml
-🔐 Funcionalidades
-✔ Tela de Login
-Formulário com usuário e senha
-Envio via método POST
-✔ Validação
-Autenticação simples (hardcoded)
-Usuário: admin
-Senha: 123
-✔ Sessão (HttpSession)
-Criação de sessão ao logar
-Armazenamento do usuário logado
-✔ Página protegida (Dashboard)
-Acesso permitido apenas se estiver logado
-Redirecionamento automático caso não esteja autenticado
-✔ Logout
-Invalidação da sessão
-Retorno para tela de login
-🔁 Fluxo da aplicação
-Usuário acessa login.jsp
-Envia credenciais
-LoginServlet valida:
-✔ válido → cria sessão → redireciona para dashboard
-❌ inválido → retorna para login com erro
-dashboard.jsp verifica sessão:
-✔ existe → mostra conteúdo
-❌ não existe → redireciona para login
-Logout destrói a sessão
-🧠 Como funciona a sessão
+```bash
+mvn clean package
+```
 
-Quando o usuário faz login:
+---
 
-HttpSession session = request.getSession();
-session.setAttribute("usuarioLogado", usuario);
+## 2. Deploy no Tomcat
 
-O servidor:
+Copie o `.war` para a pasta `webapps` do Tomcat:
 
-Cria um ID de sessão (JSESSIONID)
-Envia via cookie para o navegador
+```bash
+cp target/java-servlet-1.0-SNAPSHOT.war ~/apache-tomcat-9.0.82/webapps/
+```
 
-Nas próximas requisições:
+---
 
-O navegador envia o cookie
-O servidor recupera a sessão
-Mantém o usuário autenticado
-🔒 Controle de acesso
+## 3. Iniciar o servidor (modo debug)
 
-Exemplo na dashboard.jsp:
+```bash
+~/apache-tomcat-9.0.82/bin/catalina.sh run
+```
 
-<%
-String usuario = (String) session.getAttribute("usuarioLogado");
+👉 Esse modo mostra logs no terminal (recomendado para desenvolvimento)
 
-if (usuario == null) {
-    response.sendRedirect("login.jsp");
-}
-%>
-⚙️ Configuração do Servlet (web.xml)
-<servlet>
-    <servlet-name>LoginServlet</servlet-name>
-    <servlet-class>LoginServlet</servlet-class>
-</servlet>
+---
 
-<servlet-mapping>
-    <servlet-name>LoginServlet</servlet-name>
-    <url-pattern>/login</url-pattern>
-</servlet-mapping>
-▶️ Como executar
-Instale o Apache Tomcat
-Configure o servidor na IDE (ex: IntelliJ)
-Faça o deploy do projeto
-Acesse:
-http://localhost:8080/seu-projeto/login.jsp
+## 🌐 Acessar a aplicação
+
+```text
+http://localhost:8080/java-servlet-1.0-SNAPSHOT/login.jsp
+```
+    
+---
+
+# 🛑 Parar o Tomcat
+
+## Método 1 (recomendado)
+
+```bash
+~/apache-tomcat-9.0.82/bin/shutdown.sh
+```
+
+---
+
+## Método 2 (forçado)
+
+### 1. Encontrar processo:
+
+```bash
+ps aux | grep tomcat
+```
+
+### 2. Matar processo:
+
+```bash
+kill -9 PID
+```
+
+(Substitua `PID` pelo número do processo)
+
+---
+
+# 🔁 Recompilar após alterações
+
+## 🔧 Alterações em Java (Servlets, ConnectionFactory, etc)
+
+É necessário rebuild completo:
+
+```bash
+mvn clean package
+cp target/java-servlet-1.0-SNAPSHOT.war ~/apache-tomcat-9.0.82/webapps/
+```
+
+Depois reinicie o Tomcat.
+
+---
+
+## 🎨 Alterações em JSP
+
+### Opção 1 (segura - recomendada)
+
+Rebuild completo:
+
+```bash
+mvn clean package
+```
+
+---
+
+### Opção 2 (rápida - desenvolvimento)
+
+Copiar diretamente os arquivos JSP:
+
+```bash
+cp src/web/*.jsp ~/apache-tomcat-9.0.82/webapps/java-servlet-1.0-SNAPSHOT/
+```
+
+👉 Atualize a página no navegador (F5)
+
+---
+
+# 🧠 Estrutura do projeto
+
+```text
+src/
+ ├── web/                # JSPs (login, register, dashboard)
+ ├── java/               # Servlets e classes Java
+
+target/
+ ├── *.war               # Arquivo gerado pelo Maven
+```
+
+---
+
+# 🗄️ Banco de dados
+
+## Configuração padrão
+
+```java
+jdbc:postgresql://localhost:5432/login_java_db
+```
+
+## Usuário padrão:
+
+```text
+user: postgres
+password: postgres
+```
+
+---
+
+# ⚠️ Problemas comuns
+
+## ❌ Erro: `Address already in use`
+
+Significa que o Tomcat já está rodando.
+
+➡️ Solução:
+
+```bash
+ps aux | grep tomcat
+kill -9 PID
+```
+
+---
+
+## ❌ Erro: `relation "usuarios" does not exist`
+
+➡️ A tabela não existe no banco atual
+
+Crie:
+
+```sql
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    usuario VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL
+);
+```
+
+---
+
+## ❌ Aplicação não atualiza após mudanças
+
+➡️ Provável causa:
+
+* WAR antigo
+* não rodou `mvn clean package`
+
+---
+
+# 📌 Boas práticas
+
+* Sempre usar `catalina.sh run` durante desenvolvimento
+* Não misturar com `startup.sh`
+* Evitar múltiplas versões do projeto em `webapps`
+* Sempre rebuildar após alterações em Java
+
+---
+
+# 📈 Próximos passos
+
+* Implementar hash de senha (BCrypt)
+* Migrar estrutura para `src/main/webapp`
+* Separar camadas (DAO, Service, Controller)
+* Integrar com frontend moderno
+
+---
+
+# 👨‍💻 Autor
+
+Projeto desenvolvido para estudo de Servlets, JSP e integração com PostgreSQL.

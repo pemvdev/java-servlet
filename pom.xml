@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>java-servlet</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <properties>
+        <!-- Configuração para Java 8 -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- API do Servlet (necessário para compilação, o Tomcat provê em execução) -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Driver JDBC do PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.2</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- Mapeando o diretório customizado de código fonte do projeto -->
+        <sourceDirectory>src/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <!-- Mapeando o diretório customizado de arquivos web (JSP, HTML) -->
+                    <warSourceDirectory>src/web</warSourceDirectory>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <!-- Plugin para rodar a aplicação via Maven facilmente -->
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.53.v20231009</version>
+                <configuration>
+                    <webAppSourceDirectory>${project.basedir}/src/web</webAppSourceDirectory>
+                    <contextPath>/</contextPath>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
